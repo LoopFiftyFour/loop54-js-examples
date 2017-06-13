@@ -28,28 +28,77 @@
         <li>loop54-js-lib.js <br>(<a href="scripts/loop54-js-lib.js">scripts/loop54-js-lib.js</a>)</li>
       </ul>
     </div>
-
+    <h3>1. Add product to track</h3>
     <p>
-      <label>Product to track</label>
-      <textarea id="trackProduct" cols="50">[{"EntityType": "Product", "ExternalId": "4"},{"EntityType": "Product", "ExternalId": "5"}]</textarea>
+      <label>EntityType<span class="helpText">(Usually "Product")</span></label>
+      <input type="text" id="entityType" placeholder="Product" value="Product">
     </p>
     <p>
-      <label>EventType</label>
+      <label>ExternalId<span class="helpText">(The ID that you use to identifiy the item)</span></label>
+      <input type="text" id="externalId" placeholder="1234" value="1234">
+    </p>
+    <h3>2. Set EventType</h3>
+    <p>
+      <label>Choose an EventType<span class="helpText">(Click/AddToCart/Purchase)</span></label>
       <select id="trackEventType"><option value="Click">Click</option><option value="AddToCart">AddToCart</option><option value="Purchase">Purchase</option></select>
     </p>
+    <h3>3. Track the event</h3>
     <p>
-      <input type="button" id="track" onclick="track(document.getElementById('trackProduct').value, document.getElementById('trackEventType').value)" value="Track event" />
+      <input type="button" class="button" id="track" onclick="handleClick()" value="Track event" />
     </p>
-    <h3>Request Parameters</h3>
+    <h3>4. Check result</h3>
+    <h4>Request Parameters sent to loop54-js-lib</h4>
     <pre id="requestParameters"></pre>
-    <h3>Response</h3>
+    <h4>Response</h4>
     <pre id="response"></pre>
   </div>
+  <h3 id="showCodeHeader" class="showCodeHeader" onClick="showCode()">Show code ▼</h3>
+  <div id="showCode" class="showCode"><pre class="code">
+&lt;script type="text/javascript" src="loop54-js-lib.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript"&gt;
+  function track(entities, eventType) {
+    if(typeof(entities) === 'string') { entities = JSON.parse(entities); };
+    var requestParameters = {
+      Events: entities.map(function(entity) {
+        return {
+          Type: eventType,
+          Entity: {
+            EntityType: entity.EntityType,
+            ExternalId: entity.ExternalId,
+          },
+        }
+      }),
+      QuestName: 'CreateEvents',
+    };
+
+    Loop54.getResponse(requestParameters).then(function(response) {
+      // here you can put success messages, it's not required to do anything after an event is sent.
+    });
+  };
+&lt;/script&gt;
+</pre></div>
 
   <script type="text/javascript" src="scripts/loop54-js-lib.js"></script>
   <script type="text/javascript" src="scripts/syntaxhighlight.js"></script> <!-- import syntaxHighlight() -->
   <script type="text/javascript">
-    Loop54.setConfig({url: 'http://helloworld.54proxy.se'}); // you will get this config from us when we have set up an engine
+    function showCode() {
+      if(document.getElementById("showCode").style.display === "inline-block") {
+        document.getElementById("showCodeHeader").innerText = "Show code ▼";
+        document.getElementById("showCode").style.display = "none";
+      } else {
+        document.getElementById("showCodeHeader").innerText = "Hide code ▲";
+        document.getElementById("showCode").style.display = "inline-block";
+      }
+    };
+
+    function handleClick() {
+      var entity = {};
+      entity.EntityType = document.getElementById('entityType').value;
+      entity.ExternalId = document.getElementById('externalId').value;
+      track([entity], document.getElementById('trackEventType').value);
+    }
+
+    Loop54.setConfig({url: 'https://helloworld.54proxy.se'}); // you will get this config from us when we have set up an engine
     function track(entities, eventType) {
       if(typeof(entities) === 'string') { entities = JSON.parse(entities); };
       var requestParameters = {
@@ -69,9 +118,13 @@
       document.getElementById("requestParameters").innerHTML = syntaxHighlight(str); // Not required to keep (for demo purposes)
 
       Loop54.getResponse(requestParameters).then(function(response) {
+        // here you can put success messages, it's not required to do anything after an event is sent.
+
+        /* This part is for demo purposes only, you can remove this part */
         console.log("Response", response); // Not required to keep (for demo purposes)
         var str = JSON.stringify(response, null, 2); // Not required to keep (for demo purposes)
         document.getElementById("response").innerHTML = syntaxHighlight(str); // Not required to keep (for demo purposes)
+        /* end */
       });
     };
   </script>

@@ -50,7 +50,7 @@
   <script type="text/javascript" src="scripts/loop54-js-lib.js"></script>
   <script type="text/javascript">
     var redirectSearch = function(event, query, facet) {
-      var searchPageLocation = '/';
+      var searchPageLocation = 'http://d.loop54.com/';
       if(document.location.pathname === searchPageLocation) { return; } // prevent redirect if you are on the searchpage
       if(event) {
         event.preventDefault();
@@ -71,7 +71,7 @@
     * Autocomplete example, using jQuery UI's autocomplete library
     */
 
-    Loop54.setConfig({url: 'http://helloworld.54proxy.se'}); // you will get this config from us when we have set up an engine
+    Loop54.setConfig({url: 'https://helloworld.54proxy.se'}); // you will get this config from us when we have set up an engine
     var autocompleteCache = {};
     var autoCompletePageSize = 6;
     var autoCompleteQuest = 'AutoComplete';
