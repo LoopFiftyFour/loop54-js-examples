@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width" />
+  <title>Loop54 Demo: search example</title>
+  <link rel="icon" href="/favicon.ico?v=1.1">
+  <link rel="stylesheet" href="styles/jquery-ui.min.css" />
+  <link rel="stylesheet" href="styles/examples.css" />
+  <style>
+    form { margin-bottom: 30px; }
+    label { display: block; width: 100%; }
+    input { width: 225px; }
+    button { width: 65px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <a href="/"><img src="images/logo.png"></a>
+    <h1>Searchbox example</h1>
+  </div>
+  <div class="container">
+    <div class="info">
+      <h2>Info</h2>
+      This example shows how to implement a search box that will either give you autocomplete
+      suggestions and redirect to the searchpage, or just redirect to the searchpage.<br><br>
+      Dependencies for this example:
+      <ul>
+        <li>loop54-js-lib.js <br>(<a href="scripts/loop54-js-lib.js">scripts/loop54-js-lib.js</a>)</li>
+        <li>jquery-2.1.1.min.js <br>(<a href="scripts/jquery-2.1.1.min.js">scripts/jquery-2.1.1.min.js</a>)</li>
+        <li>jquery-ui.min.js <br>(<a href="scripts/jquery-ui.min.js">scripts/jquery-ui.min.js</a>)</li>
+        <li>jquery-ui.min.css <br>(<a href="styles/jquery-ui.min.css">styles/jquery-ui.min.css</a>)</li>
+      </ul>
+    </div>
+
+    <form id="searchWithAutocompleteForm" action="#" onsubmit="return false">
+      <label for="search-with-autocomplete">Search with Autocomplete</label>
+      <input type="text" name="search" id="search-with-autocomplete" placeholder="Type something" />
+      <button type="submit">Search</button>
+    </form>
+
+    <form id="searchForm" action="#" onsubmit="return false">
+      <label for="search">Search</label>
+      <input type="text" name="search" id="search" placeholder="Type something" />
+      <button type="submit">Search</button>
+    </form>
+  </div>
+  <script type="text/javascript" src="scripts/jquery-2.1.1.min.js"></script>
+  <script type="text/javascript" src="scripts/jquery-ui.min.js"></script>
+  <script type="text/javascript" src="scripts/loop54-js-lib.js"></script>
+  <script type="text/javascript">
+    var redirectSearch = function(event, query, facet) {
+      var searchPageLocation = '/';
+      if(document.location.pathname === searchPageLocation) { return; } // prevent redirect if you are on the searchpage
+      if(event) {
+        event.preventDefault();
+        query = document.forms[event.target.id].search.value;
+      }
+      if(query.length > 1) {
+        var redirectString = searchPageLocation + '#config=HelloWorld&query=' + query;
+        if(facet) { redirectString = redirectString + '&f=' + facet };
+        document.location = redirectString;
+      }
+    }
+
+    // listen for submit event
+    document.getElementById('searchWithAutocompleteForm').addEventListener('submit', redirectSearch);
+    document.getElementById('searchForm').addEventListener('submit', redirectSearch);
+
+    /*
+    * Autocomplete example, using jQuery UI's autocomplete library
+    */
+
+    Loop54.setConfig({url: 'http://helloworld.54proxy.se'}); // you will get this config from us when we have set up an engine
+    var autocompleteCache = {};
+    var autoCompletePageSize = 6;
+    var autoCompleteQuest = 'AutoComplete';
+    $('#search-with-autocomplete').autocomplete({
+      minLength: 2,
+      source:  function(req, res) {
+
+        var req,
+        cache = autocompleteCache;
+
+        if(autocompleteCache[req.term]) {
+          var response = autocompleteCache[req.term];
+          if(!response.success) {
+            console.log(response.errorMessage);
+          } else {
+            var data = response.data;
+            if(data.AutoComplete.length > 0) {
+              res(formatData(data));
+            } else {
+              res([]);
+            }
+          }
+        }
+        req = {
+          QuestName: autoCompleteQuest,
+          QueryString: req.term,
+        };
+        if(autoCompletePageSize > 0) {
+          req.autoComplete_FromIndex = 0;
+          req.autoComplete_ToIndex = autoCompletePageSize;
+        }
+        Loop54.getResponse(req).then(function(response) {
+          autocompleteCache[req.term] = response;
+          if(!response.success) {
+            console.log(response.errorMessage);
+          } else {
+            var data = response.data;
+            if(data.AutoComplete.length > 0) {
+              res(formatData(data));
+            } else {
+              res([]);
+            }
+          }
+        });
+
+      },
+      select: function(event, ui) {
+        event.preventDefault();
+        event.stopPropagation();
+        redirectSearch(null, ui.item.value, ui.item.facet);
+      },
+      open: function(event, ui) {
+        // prevent iOS from first setting focus on menu items instead of triggering click event
+        $('.ui-autocomplete').off('menufocus hover mouseover mouseenter');
+      },
+    });
+
+    $('#search-with-autocomplete').autocomplete('instance')._renderMenu = function(ul, items) {
+      var that = this;
+      var facets = [], withoutFacets = [];
+      facets = items.filter(function(item) {return item.facet ? true : false});
+      if(facets.length > 0) { facets[facets.length-1]['lastFacetItem'] = true };
+      withoutFacets = items.filter(function(item) {return item.facet ? false : true});
+      items = facets.concat(withoutFacets);
+      $.each(items, function(index, item) {
+        that._renderItemData(ul, item);
+      });
+    };
+
+    $('#search-with-autocomplete').autocomplete('instance')._renderItem = function(ul, item) {
+      var label = item.value;
+      if(item.facet) {
+        label = item.value + ' in ' + '<span class="facet">' + item.facet + '</span>';
+      }
+      return $('<li/>').addClass(item.lastFacetItem ? 'last-facet-item' : null).append('<a>' + label + '</a>').appendTo(ul);
+    };
+
+    var formatData = function(data) {
+      var ret, facets;
+      ret = data.AutoComplete.map(function(x) {
+        return {
+          value: x.Key,
+          label: x.Key,
+        };
+      });
+
+      facets = data.AutoCompleteFacets.map(function(x) {
+        return {
+          label: data.AutoCompleteFacetingString,
+          value: data.AutoCompleteFacetingString,
+          facet: x.Key,
+        };
+      });
+
+      ret = ret.concat(facets);
+      return ret;
+    }
+  </script>
+</body>
+</html>

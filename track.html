@@ -1,0 +1,79 @@
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width" />
+  <title>Loop54 Demo: autocomplete example</title>
+  <link rel="icon" href="/favicon.ico?v=1.1">
+  <link rel="stylesheet" href="styles/examples.css" />
+  <style>
+    label { display: block; width: 100%; }
+    input { width: 225px; }
+    button { width: 65px; }
+    .key { color: blue; }
+    .string { color: red; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <a href="/"><img src="images/logo.png"></a>
+    <h1>Tracking Events example</h1>
+  </div>
+  <div class="container">
+    <div class="info">
+      <h2>Info</h2>
+      This example shows how to track events for either 'Click', 'AddToCart' or 'Purchase'.<br><br>
+      It is required to provide <i>EntityType</i> and <i>ExternalId</i> of the product you are tracking, so that we can put everything together correctly.<br><br>
+      Dependencies for this example:
+      <ul>
+        <li>loop54-js-lib.js <br>(<a href="scripts/loop54-js-lib.js">scripts/loop54-js-lib.js</a>)</li>
+      </ul>
+    </div>
+
+    <p>
+      <label>Product to track</label>
+      <textarea id="trackProduct" cols="50">[{"EntityType": "Product", "ExternalId": "4"},{"EntityType": "Product", "ExternalId": "5"}]</textarea>
+    </p>
+    <p>
+      <label>EventType</label>
+      <select id="trackEventType"><option value="Click">Click</option><option value="AddToCart">AddToCart</option><option value="Purchase">Purchase</option></select>
+    </p>
+    <p>
+      <input type="button" id="track" onclick="track(document.getElementById('trackProduct').value, document.getElementById('trackEventType').value)" value="Track event" />
+    </p>
+    <h3>Request Parameters</h3>
+    <pre id="requestParameters"></pre>
+    <h3>Response</h3>
+    <pre id="response"></pre>
+  </div>
+
+  <script type="text/javascript" src="scripts/loop54-js-lib.js"></script>
+  <script type="text/javascript" src="scripts/syntaxhighlight.js"></script> <!-- import syntaxHighlight() -->
+  <script type="text/javascript">
+    Loop54.setConfig({url: 'http://helloworld.54proxy.se'}); // you will get this config from us when we have set up an engine
+    function track(entities, eventType) {
+      if(typeof(entities) === 'string') { entities = JSON.parse(entities); };
+      var requestParameters = {
+        Events: entities.map(function(entity) {
+          return {
+            Type: eventType,
+            Entity: {
+              EntityType: entity.EntityType,
+              ExternalId: entity.ExternalId,
+            },
+          }
+        }),
+        QuestName: 'CreateEvents',
+      };
+
+      var str = JSON.stringify(requestParameters, null, 2); // Not required to keep (for demo purposes)
+      document.getElementById("requestParameters").innerHTML = syntaxHighlight(str); // Not required to keep (for demo purposes)
+
+      Loop54.getResponse(requestParameters).then(function(response) {
+        console.log("Response", response); // Not required to keep (for demo purposes)
+        var str = JSON.stringify(response, null, 2); // Not required to keep (for demo purposes)
+        document.getElementById("response").innerHTML = syntaxHighlight(str); // Not required to keep (for demo purposes)
+      });
+    };
+  </script>
+</body>
+</html>

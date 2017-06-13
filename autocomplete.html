@@ -1,0 +1,90 @@
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width" />
+  <title>Loop54 Demo: autocomplete example</title>
+  <link rel="icon" href="/favicon.ico">
+  <link rel="stylesheet" href="styles/examples.css" />
+  <style>
+    label { display: block; width: 100%; }
+    input { width: 225px; }
+    button { width: 65px; }
+    .key { color: blue; }
+    .string { color: red; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <a href="/"><img src="images/logo.png"></a>
+    <h1>Autocomplete example</h1>
+  </div>
+  <div class="container">
+    <div class="info">
+      <h2>Info</h2>
+      This example shows how to use 'loop54-js-lib' to get an autocomplete response back from the API.<br><br>
+      Try for instance to search for "apple" and you will see the response in json format below.<br><br>
+      This example does not include any autocomplete library,
+      we utilize jQuery UI's autocomplete library in the search example, but it's not mandatory.<br><br>
+      Dependencies for this example:
+      <ul>
+        <li>loop54-js-lib.js <br>(<a href="scripts/loop54-js-lib.js">scripts/loop54-js-lib.js</a>)</li>
+      </ul>
+    </div>
+
+    <label for="search">Search</label><input type="text" id="search" placeholder="Type something">
+    <h3>Response for "<span id="search-query"></span>"</h3>
+    <pre id="response"></pre>
+  </div>
+
+  <script type="text/javascript" src="scripts/loop54-js-lib.js"></script>
+  <script type="text/javascript" src="scripts/syntaxhighlight.js"></script> <!-- import syntaxHighlight() -->
+  <script type="text/javascript">
+    Loop54.setConfig({url: 'http://helloworld.54proxy.se'}); // you will get this config from us when we have set up an engine
+    function autocompleteSearch() {
+      var query = document.getElementById('search').value;
+      document.getElementById('search-query').innerText = query;
+      if(query.length > 1) {
+        console.log('Searching for ' + query);
+        Loop54.getResponse({
+          QuestName: 'AutoComplete',
+          QueryString: query,
+          autoComplete_FromIndex: 0,
+          autoComplete_ToIndex: 10,
+        }).then(function(response) {
+          if(response.success) {
+            var data = response.data;
+            if(data.AutoComplete.length > 0) {
+              var ret, facets;
+              ret = data.AutoComplete.map(function(x) {
+                return {
+                  value: x.Key,
+                  label: x.Key,
+                };
+              });
+              facets = data.AutoCompleteFacets.map(function(x) {
+                return {
+                  label: data.AutoCompleteFacetingString,
+                  value: data.AutoCompleteFacetingString,
+                  facet: x.Key,
+                };
+              });
+              ret.concat(facets);
+              return ret;
+            } else {
+              return [];
+            }
+          }
+        }).then(function(response) {
+          console.log('Response', response);
+          var str = JSON.stringify(response, null, 2);
+          document.getElementById('response').innerHTML = syntaxHighlight(str);
+        });
+      } else {
+        document.getElementById('response').innerHTML = "";
+      };
+    };
+
+    document.getElementById('search').addEventListener('keyup', autocompleteSearch)
+  </script>
+</body>
+</html>

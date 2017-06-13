@@ -1,0 +1,61 @@
+body {
+  margin: 0;
+  font-family: "Arial";
+}
+
+.header {
+  background: #eee;
+}
+
+.header img {
+  height: 70px;
+  vertical-align: middle;
+}
+
+.header h1 {
+  display: inline;
+  margin: 0;
+  margin-left: 20px;
+}
+
+.container {
+  padding: 20px;
+  width: 400px;
+}
+
+.container .info {
+  position: absolute;
+  border: 1px solid #ccc;
+  word-wrap: normal;
+  word-break: keep-all;
+  top: 90px;
+  right: 20px;
+  padding: 0 20px 20px 20px;
+  width: 350px;
+}
+
+.container .info ul {
+  padding-left: 20px;
+}
+
+.container .info ul a,
+.container .info ul a:visited {
+  color: #aaa;
+}
+
+.container .info ul a:hover {
+  color: #FF6346;
+}
+
+.ui-menu .ui-state-focus, .ui-menu .ui-state-active {
+  margin: 0 !important;
+  border: 0;
+}
+
+.last-facet-item {
+  border-bottom: 1px solid #ddd !important;
+}
+
+.facet {
+  font-weight: bold;
+}
