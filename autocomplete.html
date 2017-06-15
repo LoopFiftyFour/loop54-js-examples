@@ -2,29 +2,24 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width" />
-  <title>Loop54 Demo: autocomplete example</title>
+  <title>Loop54 Demo: Autocomplete request & response example</title>
   <link rel="icon" href="/favicon.ico">
   <link rel="stylesheet" href="styles/examples.css" />
   <style>
-    label { display: block; width: 100%; }
-    input { width: 225px; }
-    button { width: 65px; }
-    .key { color: blue; }
-    .string { color: red; }
   </style>
 </head>
 <body>
   <div class="header">
     <a href="index.html"><img src="images/logo.png"></a>
-    <h1>Autocomplete example</h1>
+    <h1>Autocomplete request & response example</h1>
   </div>
   <div class="container">
     <div class="info">
       <h2>Info</h2>
-      This example shows how to use 'loop54-js-lib' to get an autocomplete response back from the API.<br><br>
+      This example shows how to use "loop54-js-lib" to get an autocomplete response back from the API.<br><br>
       Try for instance to search for "apple" and you will see the response in json format below.<br><br>
       This example does not include any autocomplete library,
-      we utilize jQuery UI's autocomplete library in the search example, but it's not mandatory.<br><br>
+      we utilize jQuery UI's autocomplete library in the <a href="searchbox.html">search example</a>, but it's not mandatory.<br><br>
       Dependencies for this example:
       <ul>
         <li>loop54-js-lib.js <br>(<a href="scripts/loop54-js-lib.js">scripts/loop54-js-lib.js</a>)</li>
@@ -39,14 +34,14 @@
   <script type="text/javascript" src="scripts/loop54-js-lib.js"></script>
   <script type="text/javascript" src="scripts/syntaxhighlight.js"></script> <!-- import syntaxHighlight() -->
   <script type="text/javascript">
-    Loop54.setConfig({url: 'https://helloworld.54proxy.se'}); // you will get this config from us when we have set up an engine
+    Loop54.setConfig({url: "https://helloworld.54proxy.se"}); // you will get this config from us when we have set up an engine
     function autocompleteSearch() {
-      var query = document.getElementById('search').value;
-      document.getElementById('search-query').innerText = query;
+      var query = document.getElementById("search").value;
+      document.getElementById("search-query").innerText = query;
       if(query.length > 1) {
-        console.log('Searching for ' + query);
+        console.log("Searching for " + query);
         Loop54.getResponse({
-          QuestName: 'AutoComplete',
+          QuestName: "AutoComplete",
           QueryString: query,
           autoComplete_FromIndex: 0,
           autoComplete_ToIndex: 10,
@@ -68,23 +63,23 @@
                   facet: x.Key,
                 };
               });
-              ret.concat(facets);
+              ret = ret.concat(facets);
               return ret;
             } else {
               return [];
             }
           }
         }).then(function(response) {
-          console.log('Response', response);
+          console.log("Response", response);
           var str = JSON.stringify(response, null, 2);
-          document.getElementById('response').innerHTML = syntaxHighlight(str);
+          document.getElementById("response").innerHTML = syntaxHighlight(str);
         });
       } else {
-        document.getElementById('response').innerHTML = "";
+        document.getElementById("response").innerHTML = "";
       };
     };
 
-    document.getElementById('search').addEventListener('keyup', autocompleteSearch)
+    document.getElementById("search").addEventListener("keyup", autocompleteSearch)
   </script>
 </body>
 </html>

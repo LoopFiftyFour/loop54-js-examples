@@ -18,6 +18,11 @@ body {
   margin-left: 20px;
 }
 
+form { margin-bottom: 30px; }
+label { display: block; width: 100%; }
+input { width: 225px; }
+button { width: 65px; }
+
 h3 {
   border-bottom: 1px solid #ddd;
   padding-bottom: 5px;
@@ -29,6 +34,9 @@ h3 {
 p {
   margin-left: 20px;
 }
+
+.key { color: blue; }
+.string { color: red; }
 
 .helpText {
   font-size: 12px;
@@ -49,12 +57,13 @@ p {
 
 .container {
   padding: 20px;
-  width: 400px;
+  min-width: 400px;
 }
 
 .container .info {
   position: absolute;
   border: 1px solid #ccc;
+  background: #fff;
   word-wrap: normal;
   word-break: keep-all;
   top: 90px;

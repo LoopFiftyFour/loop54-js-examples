@@ -3,15 +3,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width" />
-  <title>Loop54 Demo: search example</title>
+  <title>Loop54 Demo: Search example</title>
   <link rel="icon" href="/favicon.ico?v=1.1">
   <link rel="stylesheet" href="styles/jquery-ui.min.css" />
   <link rel="stylesheet" href="styles/examples.css" />
   <style>
-    form { margin-bottom: 30px; }
-    label { display: block; width: 100%; }
-    input { width: 225px; }
-    button { width: 65px; }
   </style>
 </head>
 <body>
@@ -44,38 +40,82 @@
       <input type="text" name="search" id="search" placeholder="Type something" />
       <button type="submit">Search</button>
     </form>
+
+    <label>Redirect URL/path</label>
+    <input type="text" name="path" id="path" placeholder="http://d.loop54.com/" value="http://d.loop54.com/" />
+
+    <h3>Resulting redirect</h3>
+    <div id="result"></div>
   </div>
-  <script type="text/javascript" src="scripts/jquery-2.1.1.min.js"></script>
-  <script type="text/javascript" src="scripts/jquery-ui.min.js"></script>
-  <script type="text/javascript" src="scripts/loop54-js-lib.js"></script>
-  <script type="text/javascript">
-    var redirectSearch = function(event, query, facet) {
-      var searchPageLocation = 'http://d.loop54.com/';
-      if(document.location.pathname === searchPageLocation) { return; } // prevent redirect if you are on the searchpage
-      if(event) {
-        event.preventDefault();
-        query = document.forms[event.target.id].search.value;
-      }
-      if(query.length > 1) {
-        var redirectString = searchPageLocation + '#config=HelloWorld&query=' + query;
-        if(facet) { redirectString = redirectString + '&f=' + facet };
-        document.location = redirectString;
-      }
+  <h3 id="showCodeHeader" class="showCodeHeader" onClick="showCode()">Show code ▼</h3>
+  <div id="showCode" class="showCode">
+<div><label>Change to your loop54 endpoint (54proxy address)</label><input type="text" id="configUrl" placeholder="https://helloworld.54proxy.se" value="https://helloworld.54proxy.se" /></div>
+<br><br>If you haven't included loop54-js-lib already, include this part and configure it to talk to your loop54 proxy
+<pre class="code">
+&lt;script type="text/javascript" src="loop54-js-lib.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript"&gt;
+  Loop54.setConfig({url: "https://helloworld.54proxy.se"}); // you will get this config from us when we have set up an engine
+&lt;/script&gt;
+</pre>
+Then include the following function in a separate javascript file or last in your HTML body tag
+<pre class="code">
+&lt;script type="text/javascript"&gt;
+  var redirectSearch = function(event, query, facet) {
+    var searchPageLocation = "http://d.loop54.com/"; // Change this to the URL or path of your searchpage. I.E. ("/search")
+    if(document.location.pathname === searchPageLocation) { return; } // Prevent redirect if you are on the searchpage already
+    if(event) {
+      event.preventDefault();
+      query = document.forms[event.target.id].search.value;
     }
+    if(query.length > 1) {
+      /*
+      * This defines how you want a query to be formatted before sending,
+      * we are using hash (#) by default but feel free to change it to questionmark (?) if that's what you prefer.
+      */
+      var redirectString = searchPageLocation + "#query=" + query;
 
-    // listen for submit event
-    document.getElementById('searchWithAutocompleteForm').addEventListener('submit', redirectSearch);
-    document.getElementById('searchForm').addEventListener('submit', redirectSearch);
+      // This also adds a facet if that was choosen in autocomplete
+      if(facet) { redirectString = redirectString + "&f=" + facet };
 
-    /*
-    * Autocomplete example, using jQuery UI's autocomplete library
-    */
+      document.location = redirectString; // Changing document.location will redirect the browser to the new location
+    }
+  }
+&lt;/script&gt;
+</pre>
+Then choose which version of the searchbox you want to use, with or without autocomplete.<br><br>
+This first example is without autocomplete
+<pre class="code">
+&lt;form id="searchForm" action="#" onsubmit="return false"&gt;
+  &lt;label for="search"&gt;Search&lt;/label&gt;
+  &lt;input type="text" name="search" id="search" placeholder="Type something" /&gt;
+  &lt;button type="submit"&gt;Search&lt;/button&gt;
+&lt;/form&gt;
 
-    Loop54.setConfig({url: 'https://helloworld.54proxy.se'}); // you will get this config from us when we have set up an engine
+&lt;script type="text/javascript"&gt;
+  document.getElementById("searchForm").addEventListener("submit", redirectSearch);
+&lt;/script&gt;
+</pre>
+This example is with autocomplete
+<pre class="code">
+&lt;head&gt;
+  &lt;link rel="stylesheet" href="jquery-ui.min.css" /&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;form id="searchWithAutocompleteForm" action="#" onsubmit="return false"&gt;
+    &lt;label for="search-with-autocomplete"&gt;Search&lt;/label&gt;
+    &lt;input type="text" name="search" id="search-with-autocomplete" placeholder="Type something" /&gt;
+    &lt;button type="submit"&gt;Search&lt;/button&gt;
+  &lt;/form&gt;
+
+  &lt;script type="text/javascript" src="jquery-2.1.1.min.js"&gt;&lt;/script&gt;
+  &lt;script type="text/javascript" src="jquery-ui.min.js"&gt;&lt;/script&gt;
+  &lt;script type="text/javascript"&gt;
+    document.getElementById("searchForm").addEventListener("submit", redirectSearch);
+
     var autocompleteCache = {};
     var autoCompletePageSize = 6;
-    var autoCompleteQuest = 'AutoComplete';
-    $('#search-with-autocomplete').autocomplete({
+    var autoCompleteQuest = "AutoComplete";
+    $("#search-with-autocomplete").autocomplete({
       minLength: 2,
       source:  function(req, res) {
 
@@ -125,15 +165,15 @@
       },
       open: function(event, ui) {
         // prevent iOS from first setting focus on menu items instead of triggering click event
-        $('.ui-autocomplete').off('menufocus hover mouseover mouseenter');
+        $(".ui-autocomplete").off("menufocus hover mouseover mouseenter");
       },
     });
 
-    $('#search-with-autocomplete').autocomplete('instance')._renderMenu = function(ul, items) {
+    $("#search-with-autocomplete").autocomplete("instance")._renderMenu = function(ul, items) {
       var that = this;
       var facets = [], withoutFacets = [];
       facets = items.filter(function(item) {return item.facet ? true : false});
-      if(facets.length > 0) { facets[facets.length-1]['lastFacetItem'] = true };
+      if(facets.length > 0) { facets[facets.length-1]["lastFacetItem"] = true };
       withoutFacets = items.filter(function(item) {return item.facet ? false : true});
       items = facets.concat(withoutFacets);
       $.each(items, function(index, item) {
@@ -141,12 +181,12 @@
       });
     };
 
-    $('#search-with-autocomplete').autocomplete('instance')._renderItem = function(ul, item) {
+    $("#search-with-autocomplete").autocomplete("instance")._renderItem = function(ul, item) {
       var label = item.value;
       if(item.facet) {
-        label = item.value + ' in ' + '<span class="facet">' + item.facet + '</span>';
+        label = item.value + " in " + "&lt;span class=\"facet\"&gt;" + item.facet + "&lt;/span&gt;";
       }
-      return $('<li/>').addClass(item.lastFacetItem ? 'last-facet-item' : null).append('<a>' + label + '</a>').appendTo(ul);
+      return $("&lt;li/&gt;").addClass(item.lastFacetItem ? "last-facet-item" : null).append("&lt;a&gt;" + label + "&lt;/a&gt;").appendTo(ul);
     };
 
     var formatData = function(data) {
@@ -168,6 +208,182 @@
 
       ret = ret.concat(facets);
       return ret;
+    }
+  &lt;/script&gt;
+&lt;/body&gt;
+</pre>
+</div>
+  <script type="text/javascript" src="scripts/jquery-2.1.1.min.js"></script>
+  <script type="text/javascript" src="scripts/jquery-ui.min.js"></script>
+  <script type="text/javascript" src="scripts/loop54-js-lib.js"></script>
+  <script type="text/javascript">
+    var redirectSearch = function(event, query, facet) {
+      var path = document.getElementById("path").value; // this is just for the DEMO, remove if you use this code in production
+      var searchPageLocation = path; // Change this to the URL or path of your searchpage. I.E. var searchPageLocation = "/search";
+      if(document.location.pathname === searchPageLocation) { return; } // Prevent redirect if you are on the searchpage already
+      if(event) {
+        event.preventDefault();
+        query = document.forms[event.target.id].search.value;
+      }
+      if(query.length > 1) {
+        // This defines how you want a query to be formatted before sending, we are using hash (#) by default but feel free to change it to questionmark (?) if that"s what you prefer.
+        var redirectString = searchPageLocation + "#query=" + query;
+
+        // This also adds a facet if that was choosen in autocomplete
+        if(facet) { redirectString = redirectString + "&f=" + facet };
+
+        /*
+        * IMPORTANT BEFORE IMPLEMENTING!
+        * If you want to redirect to your searchpage URL
+        * you will need to remove the comments from this line below here.
+        * That will set the document.location to the new URL and therefore redirect the browser there.
+        * We have it turned off for demo purposes since we just want to show you how the searchbox works.
+        */
+        // document.location = redirectString; // remove the "//" in front of this line to actually redirect the search
+
+        /*
+        * IMPORTANT BEFORE IMPLEMENTING!
+        * You should remove the below section since it"s only for DEMO purposes
+        */
+        document.getElementsByName("search").forEach(function(input){input.value = ""});
+        document.getElementById("result").innerHTML = "Query: <b>"+query+"</b><br>This would redirect you to: <b>"+redirectString+"</b>";
+      }
+    }
+
+    // listen for submit event
+    document.getElementById("searchWithAutocompleteForm").addEventListener("submit", redirectSearch);
+    document.getElementById("searchForm").addEventListener("submit", redirectSearch);
+
+    /*
+    * Autocomplete example, using jQuery UI"s autocomplete library
+    */
+
+    Loop54.setConfig({url: "https://helloworld.54proxy.se"}); // you will get this config from us when we have set up an engine
+    var autocompleteCache = {};
+    var autoCompletePageSize = 6;
+    var autoCompleteQuest = "AutoComplete";
+    $("#search-with-autocomplete").autocomplete({
+      minLength: 2,
+      source:  function(req, res) {
+
+        var req,
+        cache = autocompleteCache;
+
+        if(autocompleteCache[req.term]) {
+          var response = autocompleteCache[req.term];
+          if(!response.success) {
+            console.log(response.errorMessage);
+          } else {
+            var data = response.data;
+            if(data.AutoComplete.length > 0) {
+              res(formatData(data));
+            } else {
+              res([]);
+            }
+          }
+        }
+        req = {
+          QuestName: autoCompleteQuest,
+          QueryString: req.term,
+        };
+        if(autoCompletePageSize > 0) {
+          req.autoComplete_FromIndex = 0;
+          req.autoComplete_ToIndex = autoCompletePageSize;
+        }
+        Loop54.getResponse(req).then(function(response) {
+          autocompleteCache[req.term] = response;
+          if(!response.success) {
+            console.log(response.errorMessage);
+          } else {
+            var data = response.data;
+            if(data.AutoComplete.length > 0) {
+              res(formatData(data));
+            } else {
+              res([]);
+            }
+          }
+        });
+
+      },
+      select: function(event, ui) {
+        event.preventDefault();
+        event.stopPropagation();
+        redirectSearch(null, ui.item.value, ui.item.facet);
+      },
+      open: function(event, ui) {
+        // prevent iOS from first setting focus on menu items instead of triggering click event
+        $(".ui-autocomplete").off("menufocus hover mouseover mouseenter");
+      },
+    });
+
+    $("#search-with-autocomplete").autocomplete("instance")._renderMenu = function(ul, items) {
+      var that = this;
+      var facets = [], withoutFacets = [];
+      facets = items.filter(function(item) {return item.facet ? true : false});
+      if(facets.length > 0) { facets[facets.length-1]["lastFacetItem"] = true };
+      withoutFacets = items.filter(function(item) {return item.facet ? false : true});
+      items = facets.concat(withoutFacets);
+      $.each(items, function(index, item) {
+        that._renderItemData(ul, item);
+      });
+    };
+
+    $("#search-with-autocomplete").autocomplete("instance")._renderItem = function(ul, item) {
+      var label = item.value;
+      if(item.facet) {
+        label = item.value + " in " + "<span class=\"facet\">" + item.facet + "</span>";
+      }
+      return $("<li/>").addClass(item.lastFacetItem ? "last-facet-item" : null).append("<a>" + label + "</a>").appendTo(ul);
+    };
+
+    var formatData = function(data) {
+      var ret, facets;
+      ret = data.AutoComplete.map(function(x) {
+        return {
+          value: x.Key,
+          label: x.Key,
+        };
+      });
+
+      facets = data.AutoCompleteFacets.map(function(x) {
+        return {
+          label: data.AutoCompleteFacetingString,
+          value: data.AutoCompleteFacetingString,
+          facet: x.Key,
+        };
+      });
+
+      ret = ret.concat(facets);
+      return ret;
+    }
+  </script>
+  <script type="text/javascript">
+    /*
+    * This part is DEMO specific code and not needed in the implementation, please remove this part if you have copied it over
+    * to your own code.
+    */
+
+    document.getElementById("path").addEventListener("keyup", changeUrl);
+    document.getElementById("configUrl").addEventListener("keyup", changeUrl);
+
+    function showCode() {
+      if(document.getElementById("showCode").style.display === "inline-block") {
+        document.getElementById("showCodeHeader").innerText = "Show code ▼";
+        document.getElementById("showCode").style.display = "none";
+      } else {
+        document.getElementById("showCodeHeader").innerText = "Hide code ▲";
+        document.getElementById("showCode").style.display = "inline-block";
+      }
+    };
+
+    function changeUrl(e) {
+      if(e.target.id === "path") {var url = e.target.value;};
+      if(e.target.id === "configUrl") {var configUrl = e.target.value;};
+      var elements = document.getElementsByTagName("pre");
+      for(var i = 0; i < elements.length; i++) {
+        if(url) {elements[i].innerHTML = elements[i].innerHTML.replace(/searchPageLocation = ".*?"/,"searchPageLocation = \""+url+"\"");};
+        if(configUrl) {elements[i].innerHTML = elements[i].innerHTML.replace(/url: ".*?"/,"url: \""+configUrl+"\"");};
+      };
     }
   </script>
 </body>

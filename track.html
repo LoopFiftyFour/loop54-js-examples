@@ -2,15 +2,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width" />
-  <title>Loop54 Demo: autocomplete example</title>
+  <title>Loop54 Demo: Tracking Events example</title>
   <link rel="icon" href="/favicon.ico?v=1.1">
   <link rel="stylesheet" href="styles/examples.css" />
   <style>
-    label { display: block; width: 100%; }
-    input { width: 225px; }
-    button { width: 65px; }
-    .key { color: blue; }
-    .string { color: red; }
   </style>
 </head>
 <body>
@@ -21,7 +16,7 @@
   <div class="container">
     <div class="info">
       <h2>Info</h2>
-      This example shows how to track events for either 'Click', 'AddToCart' or 'Purchase'.<br><br>
+      This example shows how to track events for either "Click", "AddToCart" or "Purchase".<br><br>
       It is required to provide <i>EntityType</i> and <i>ExternalId</i> of the product you are tracking, so that we can put everything together correctly.<br><br>
       Dependencies for this example:
       <ul>
@@ -53,11 +48,20 @@
     <pre id="response"></pre>
   </div>
   <h3 id="showCodeHeader" class="showCodeHeader" onClick="showCode()">Show code ▼</h3>
-  <div id="showCode" class="showCode"><pre class="code">
+  <div id="showCode" class="showCode">
+<div><label>Change to your loop54 endpoint (54proxy address)</label><input type="text" id="configUrl" placeholder="https://helloworld.54proxy.se" value="https://helloworld.54proxy.se" /></div>
+<br><br>If you haven't included loop54-js-lib already, include this part and configure it to talk to your loop54 proxy
+<pre class="code">
 &lt;script type="text/javascript" src="loop54-js-lib.js"&gt;&lt;/script&gt;
 &lt;script type="text/javascript"&gt;
+  Loop54.setConfig({url: "https://helloworld.54proxy.se"}); // you will get this config from us when we have set up an engine
+&lt;/script&gt;
+</pre>
+Then include the tracking function in a separate javascript file or last in your HTML body tag
+<pre class="code">
+&lt;script type="text/javascript"&gt;
   function track(entities, eventType) {
-    if(typeof(entities) === 'string') { entities = JSON.parse(entities); };
+    if(typeof(entities) === "string") { entities = JSON.parse(entities); };
     var requestParameters = {
       Events: entities.map(function(entity) {
         return {
@@ -68,11 +72,11 @@
           },
         }
       }),
-      QuestName: 'CreateEvents',
+      QuestName: "CreateEvents",
     };
 
     Loop54.getResponse(requestParameters).then(function(response) {
-      // here you can put success messages, it's not required to do anything after an event is sent.
+      // here you can put success messages, it"s not required to do anything after an event is sent.
     });
   };
 &lt;/script&gt;
@@ -81,26 +85,9 @@
   <script type="text/javascript" src="scripts/loop54-js-lib.js"></script>
   <script type="text/javascript" src="scripts/syntaxhighlight.js"></script> <!-- import syntaxHighlight() -->
   <script type="text/javascript">
-    function showCode() {
-      if(document.getElementById("showCode").style.display === "inline-block") {
-        document.getElementById("showCodeHeader").innerText = "Show code ▼";
-        document.getElementById("showCode").style.display = "none";
-      } else {
-        document.getElementById("showCodeHeader").innerText = "Hide code ▲";
-        document.getElementById("showCode").style.display = "inline-block";
-      }
-    };
-
-    function handleClick() {
-      var entity = {};
-      entity.EntityType = document.getElementById('entityType').value;
-      entity.ExternalId = document.getElementById('externalId').value;
-      track([entity], document.getElementById('trackEventType').value);
-    }
-
-    Loop54.setConfig({url: 'https://helloworld.54proxy.se'}); // you will get this config from us when we have set up an engine
+    Loop54.setConfig({url: "https://helloworld.54proxy.se"}); // you will get this config from us when we have set up an engine
     function track(entities, eventType) {
-      if(typeof(entities) === 'string') { entities = JSON.parse(entities); };
+      if(typeof(entities) === "string") { entities = JSON.parse(entities); };
       var requestParameters = {
         Events: entities.map(function(entity) {
           return {
@@ -111,14 +98,14 @@
             },
           }
         }),
-        QuestName: 'CreateEvents',
+        QuestName: "CreateEvents",
       };
 
       var str = JSON.stringify(requestParameters, null, 2); // Not required to keep (for demo purposes)
       document.getElementById("requestParameters").innerHTML = syntaxHighlight(str); // Not required to keep (for demo purposes)
 
       Loop54.getResponse(requestParameters).then(function(response) {
-        // here you can put success messages, it's not required to do anything after an event is sent.
+        // here you can put success messages, it"s not required to do anything after an event is sent.
 
         /* This part is for demo purposes only, you can remove this part */
         console.log("Response", response); // Not required to keep (for demo purposes)
@@ -127,6 +114,38 @@
         /* end */
       });
     };
+  </script>
+  <script type="text/javascript">
+    /*
+    * This part is DEMO specific code and not needed in the implementation, please remove this part if you have copied it over
+    * to your own code.
+    */
+    document.getElementById("configUrl").addEventListener("keyup", changeUrl);
+
+    function handleClick() {
+      var entity = {};
+      entity.EntityType = document.getElementById("entityType").value;
+      entity.ExternalId = document.getElementById("externalId").value;
+      track([entity], document.getElementById("trackEventType").value);
+    }
+
+    function showCode() {
+      if(document.getElementById("showCode").style.display === "inline-block") {
+        document.getElementById("showCodeHeader").innerText = "Show code ▼";
+        document.getElementById("showCode").style.display = "none";
+      } else {
+        document.getElementById("showCodeHeader").innerText = "Hide code ▲";
+        document.getElementById("showCode").style.display = "inline-block";
+      }
+    };
+
+    function changeUrl(e) {
+      if(e.target.id === "configUrl") {var configUrl = e.target.value;};
+      var elements = document.getElementsByTagName("pre");
+      for(var i = 0; i < elements.length; i++) {
+        if(configUrl) {elements[i].innerHTML = elements[i].innerHTML.replace(/url: ".*?"/,"url: \""+configUrl+"\"");};
+      };
+    }
   </script>
 </body>
 </html>
